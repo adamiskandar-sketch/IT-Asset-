@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apollo IT Asset Admin Portal</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root, body.theme-dark {
+      --bg-main:#0F172A; --bg-card:#182338; --bg-input:#121C2D;
+      --text-primary:#F1F5F9; --text-secondary:#94A3B8; --text-muted:#64748B;
+      --border-color:#26344D; --accent:#60A5FA; --accent-hover:#3B82F6;
+      --admin-color:#818CF8; --admin-bg:rgba(129,140,248,.15);
+      --success:#34D399; --warning:#FBBF24; --danger:#F87171;
+      --success-bg:rgba(52,211,153,.15); --warning-bg:rgba(251,191,36,.15);
+      --danger-bg:rgba(248,113,113,.15); --modal:rgba(15,23,42,.85);
+      --shadow:10px 10px 24px rgba(0,0,0,.35),-6px -6px 18px rgba(255,255,255,.025);
+      --shadow-sm:6px 6px 16px rgba(0,0,0,.28),-4px -4px 12px rgba(255,255,255,.02);
+      --inset:inset 4px 4px 10px rgba(0,0,0,.40),inset -3px -3px 8px rgba(255,255,255,.02);
+      --radius:14px; --full:9999px;
+      --shimmer-from:#152238; --shimmer-mid:#263756; --shimmer-to:#152238;
+      --shimmer-border:rgba(96,165,250,.2);
+    }
+    body.theme-light {
+      --bg-main:#eef2f7; --bg-card:#eef2f7; --bg-input:#eef2f7;
+      --text-primary:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8;
+      --border-color:rgba(255,255,255,.7); --accent:#2563eb; --accent-hover:#1d4ed8;
+      --admin-color:#4f46e5; --admin-bg:#e0e7ff;
+      --success:#059669; --warning:#d97706; --danger:#dc2626;
+      --success-bg:#d1fae5; --warning-bg:#fef3c7; --danger-bg:#fee2e2;
+      --modal:rgba(15,23,42,.40);
+      --shadow:8px 8px 16px #c5d0e0,-8px -8px 16px #fff;
+      --shadow-sm:4px 4px 10px #c5d0e0,-4px -4px 10px #fff;
+      --inset:inset 3px 3px 6px #c5d0e0,inset -3px -3px 6px #fff;
+      --shimmer-from:#dbe3ef; --shimmer-mid:#f8fafc; --shimmer-to:#dbe3ef;
+      --shimmer-border:rgba(37,99,235,.2);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--bg-main);color:var(--text-primary);line-height:1.6;padding:24px 16px;min-height:100vh}
+    button,input,textarea{font-family:inherit}
+    .app{max-width:1080px;margin:auto}
+    .header,.identity,.stat,.nav,.card,.empty{background:var(--bg-card);border:1px solid var(--border-color);box-shadow:var(--shadow);border-radius:20px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;margin-bottom:24px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;box-shadow:var(--shadow-sm);flex-shrink:0;border:1px solid var(--border-color);padding:2px}
+    .logo img{width:100%;height:100%;object-fit:contain;display:block}
+    .brand-title{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
+    .admin-pill{font-size:11px;padding:3px 10px;border-radius:var(--full);background:var(--admin-bg);color:var(--admin-color);font-weight:800;border:1px solid var(--admin-color);letter-spacing:0.5px}
+    .brand-sub{font-size:13px;color:var(--text-secondary)}
+    .theme{position:fixed;right:20px;top:20px;z-index:999;padding:8px 16px;border-radius:var(--full);background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color);box-shadow:var(--shadow-sm);cursor:pointer;font-weight:600}
+    .btn-logout { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid var(--danger); padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 12.5px; transition: all 0.2s; }
+    .btn-logout:hover { background: var(--danger); color: #fff; }
+
+    .identity{padding:20px 24px;margin-bottom:24px;display:flex;justify-content:space-between;gap:16px;align-items:center}
+    .welcome{font-size:22px;font-weight:800}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}.chip{padding:4px 12px;border-radius:var(--full);font-size:12px;background:var(--bg-input);box-shadow:var(--inset);color:var(--text-secondary)}
+    .role-chip{color:var(--admin-color);font-weight:700}
+
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .stat{padding:18px;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .15s ease}.stat:hover{transform:translateY(-2px)}
+    .stat-label{font-size:11.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;display:flex;justify-content:space-between}
+    .stat-value{font-size:30px;font-weight:800;line-height:1.2;margin-top:6px}.stat-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
+    .total-stat .stat-value{color:var(--accent)}
+    .pending .stat-value{color:var(--warning)}
+    .approved .stat-value{color:var(--success)}
+    .rejected .stat-value{color:var(--danger)}
+
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;margin-bottom:18px;box-shadow:var(--inset)}
+    .tabs{display:flex;gap:6px;flex-wrap:wrap}.tab{border:0;background:transparent;color:var(--text-secondary);padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:all .15s ease}.tab.active{color:var(--accent);background:var(--bg-card);box-shadow:var(--shadow-sm)}
+    .search{min-width:280px;position:relative}.search input{width:100%;padding:9px 14px 9px 34px;border-radius:var(--full);background:var(--bg-input);border:1px solid var(--border-color);color:var(--text-primary);box-shadow:var(--inset);outline:0}.search span{position:absolute;left:12px;top:5px;font-weight:800;color:var(--text-muted);font-size:13px}
+
+    .filters{display:none;flex-direction:column;gap:10px;margin-bottom:18px}.filters.show{display:flex}
+    .filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .sub-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:var(--bg-input);border:1px solid var(--border-color);animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+    .pill{padding:7px 14px;border-radius:var(--full);border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-size:12px;font-weight:600;transition:all .15s ease}
+    .pill:hover{border-color:var(--accent);color:var(--text-primary)}
+    .pill.active{color:var(--accent);border-color:var(--accent);background:var(--bg-input);box-shadow:var(--inset)}
+    .pill-sub{font-size:11.5px;padding:5px 12px}
+
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.section-head h2{font-size:18px}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    .request{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;box-shadow:var(--shadow-sm);padding:20px;transition:box-shadow .15s ease}
+    .request:hover{box-shadow:var(--shadow)}
+    .request-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+    .code{font-size:11.5px;color:var(--accent);font-weight:700;letter-spacing:0.4px}
+    .request-title{font-size:17px;font-weight:800;margin-top:2px;color:var(--text-primary)}
+    .request-body{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--bg-input);box-shadow:var(--inset);border:1px solid var(--border-color);border-radius:12px;padding:14px;margin-top:14px}
+    .label{font-size:10.5px;color:var(--text-secondary);font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+    .value{font-size:13px;font-weight:600;margin-top:2px;word-break:break-word}
+    .request-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+
+    .badge{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:0.3px;text-transform:uppercase;white-space:nowrap;line-height:1.2;flex-shrink:0;border:1px solid transparent}
+    .badge-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .badge.approved{background:var(--success-bg);color:var(--success);border-color:rgba(52,211,153,.35)}
+    .badge.approved .badge-dot{background:var(--success);box-shadow:0 0 6px var(--success)}
+    .badge.pending{background:var(--warning-bg);color:var(--warning);border-color:rgba(251,191,36,.35)}
+    .badge.pending .badge-dot{background:var(--warning);box-shadow:0 0 6px var(--warning)}
+    .badge.rejected{background:var(--danger-bg);color:var(--danger);border-color:rgba(248,113,113,.35)}
+    .badge.rejected .badge-dot{background:var(--danger);box-shadow:0 0 6px var(--danger)}
+    .badge.returned{background:var(--warning-bg);color:var(--warning);border-color:rgba(251,191,36,.35)}
+    .badge.returned .badge-dot{background:var(--warning)}
+
+    .btn{border:0;border-radius:12px;padding:10px 17px;cursor:pointer;font-weight:700;transition:all .15s ease}
+    .btn.primary{background:#f8fafc;color:#0f172a;box-shadow:var(--shadow-sm)}
+    .btn.neo{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color);box-shadow:var(--shadow-sm)}
+    .btn:hover{filter:brightness(1.1)}
+
+    .empty{text-align:center;padding:48px 24px}.empty h3{color:var(--success);margin:8px 0}.empty p{color:var(--text-secondary);margin-bottom:18px}
+
+    .overlay{display:none;position:fixed;inset:0;background:var(--modal);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;padding:20px}
+    .modal{background:var(--bg-card);border:1px solid var(--border-color);border-radius:20px;box-shadow:0 24px 48px rgba(0,0,0,.5);width:100%;max-width:820px;max-height:90vh;display:flex;flex-direction:column;padding:24px}
+    .modal-head{display:flex;justify-content:space-between;border-bottom:1px solid var(--border-color);padding-bottom:14px}
+    .modal-title{font-size:19px;font-weight:800}
+    .close{border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-primary);border-radius:50%;width:32px;height:32px;cursor:pointer;font-weight:800}
+    .modal-body{overflow:auto;padding:18px 4px;display:flex;flex-direction:column;gap:20px}
+    .section{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .field{background:var(--bg-input);border:1px solid var(--border-color);border-radius:12px;padding:10px 13px}
+    .wide{grid-column:1/-1}
+    .workflow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+    .step{padding:10px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-input)}
+    .step-role{font-size:10px;font-weight:800;color:var(--text-secondary);text-transform:uppercase}
+    .step-name{font-size:12px;font-weight:700;margin-top:3px}
+    .step-date{font-size:10px;color:var(--text-muted)}
+
+    .admin-notice-box{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:var(--admin-bg);border:1px solid var(--admin-color);color:var(--text-primary);font-size:12px}
+    .admin-notice-box b{color:var(--admin-color)}
+
+    .modal-foot{border-top:1px solid var(--border-color);padding-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+
+    @keyframes shimmerAnim{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .shimmer-line{background:linear-gradient(90deg,var(--shimmer-from) 20%,var(--shimmer-mid) 50%,var(--shimmer-from) 80%);background-size:200% 100%;animation:shimmerAnim 1.4s infinite linear;border-radius:6px;display:inline-block;vertical-align:middle}
+    .shimmer-step{border:1px dashed var(--shimmer-border)!important;background:var(--bg-input);display:flex;flex-direction:column;gap:6px;padding:12px 10px}
+    .shimmer-bar{width:100%;height:6px;border-radius:var(--full);background:linear-gradient(90deg,var(--admin-color) 0%,#a78bfa 50%,var(--admin-color) 100%);background-size:200% 100%;animation:shimmerAnim 1.2s infinite linear}
+
+    .loading{display:none;position:fixed;inset:0;background:var(--modal);backdrop-filter:blur(7px);z-index:2000;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+    .load-card{background:var(--bg-card);padding:24px 34px;border-radius:18px;box-shadow:var(--shadow);text-align:center;min-width:240px;border:1px solid var(--border-color)}
+    .access{display:none;background:var(--bg-card);border:1px solid var(--danger);border-radius:20px;padding:42px 24px;text-align:center;box-shadow:var(--shadow)}.access h2{color:var(--danger);margin:8px 0}.access p{color:var(--text-secondary)}
+
+    @media(max-width:840px){.stats{grid-template-columns:repeat(2,1fr)}.request-body{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){body{padding:14px 10px}.stats{grid-template-columns:1fr}.request-body,.section{grid-template-columns:1fr}.wide{grid-column:auto}.nav{align-items:stretch;flex-direction:column}.search{min-width:0}.header{padding:16px}.identity{padding:16px}.modal{padding:17px}.theme{top:10px;right:10px}}
+  </style>
+</head>
+<body class="theme-dark">
+<button class="theme" id="themeBtn" onclick="toggleTheme()">Dark</button>
+
+<div class="app">
+  <header class="header">
+    <div class="brand">
+      <div class="logo" id="logo">
+        <img id="logoImg"
+             src="https://lh3.googleusercontent.com/d/1mTsteFimPWOJYqvRaN3WBbh9GXw6K13V"
+             alt="Logo"
+             onerror="if(this.src!=='https://drive.google.com/thumbnail?id=1mTsteFimPWOJYqvRaN3WBbh9GXw6K13V&sz=w200'){this.src='https://drive.google.com/thumbnail?id=1mTsteFimPWOJYqvRaN3WBbh9GXw6K13V&sz=w200';}else{this.style.display='none';document.getElementById('logoFallback').style.display='flex';}" />
+        <span id="logoFallback" style="display:none;font-weight:800;font-size:22px;color:var(--accent)">A</span>
+      </div>
+      <div>
+        <div class="brand-title">
+          <span>Apollo IT Asset Admin Portal</span>
+          <span class="admin-pill">ADMIN VIEW</span>
+        </div>
+        <div class="brand-sub">System-Wide Request Audit & Monitoring (Read-Only)</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="signOutUser()" style="margin-left:auto;">Log Out</button>
+  </header>
+
+  <section class="identity" id="identity">
+    <div>
+      <div class="welcome" id="approverName">Loading administrator profile...</div>
+      <div class="chips">
+        <span class="chip" id="approverEmail">Email: --</span>
+        <span class="chip" id="approverRole">Role: ADMINISTRATOR</span>
+        <span class="chip role-chip">View Only Mode</span>
+      </div>
+    </div>
+    <span class="chip role-chip" id="routeInfo">Full System Visibility Access</span>
+  </section>
+
+  <main id="main">
+    <div class="stats">
+      <div class="stat total-stat" onclick="switchTab('history');setFilter('ALL')">
+        <div class="stat-label">TOTAL REQUESTS</div>
+        <div class="stat-value" id="sTotal">0</div>
+        <div class="stat-sub">All submissions</div>
+      </div>
+      <div class="stat pending" onclick="switchTab('pending');setFilter('PENDING')">
+        <div class="stat-label">ACTIVE PENDING</div>
+        <div class="stat-value" id="sPending">0</div>
+        <div class="stat-sub" id="sPendingSub">Awaiting approvals</div>
+      </div>
+      <div class="stat approved" onclick="switchTab('history');setFilter('APPROVED')">
+        <div class="stat-label">APPROVED</div>
+        <div class="stat-value" id="sApproved">0</div>
+        <div class="stat-sub">Completed & authorized</div>
+      </div>
+      <div class="stat rejected" onclick="switchTab('history');setFilter('REJECTED')">
+        <div class="stat-label">REJECTED</div>
+        <div class="stat-value" id="sRejected">0</div>
+        <div class="stat-sub">Rejected / returned</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="tabs">
+        <button class="tab active" id="pendingTab" onclick="switchTab('pending')">Active Pending Queue (<span id="pendingBadge">0</span>)</button>
+        <button class="tab" id="historyTab" onclick="switchTab('history')">All Requests History</button>
+      </div>
+      <div class="search"><span>Q</span><input id="search" placeholder="Search Ticket ID, name, department, asset, status..." oninput="render()"></div>
+    </div>
+
+    <div class="filters" id="filters">
+      <div class="filter-row">
+        <b style="font-size:11px;color:var(--text-muted)">STATUS:</b>
+        <button class="pill active" data-filter="ALL" onclick="setFilter('ALL',this)">All Status</button>
+        <button class="pill" data-filter="PENDING" onclick="setFilter('PENDING',this)">Pending</button>
+        <button class="pill" data-filter="APPROVED" onclick="setFilter('APPROVED',this)">Approved</button>
+        <button class="pill" data-filter="REJECTED" onclick="setFilter('REJECTED',this)">Rejected / Returned</button>
+      </div>
+      <div class="sub-filters" id="subFilters">
+        <b style="font-size:11px;color:var(--admin-color)" id="subFilterLabel">STAGE:</b>
+        <button class="pill pill-sub active" data-subfilter="ALL_STAGES" id="subFilterAllBtn" onclick="setSubFilter('ALL_STAGES',this)">All Stages</button>
+        <button class="pill pill-sub" data-subfilter="MANAGER" onclick="setSubFilter('MANAGER',this)">Manager Stage</button>
+        <button class="pill pill-sub" data-subfilter="HOD" onclick="setSubFilter('HOD',this)">HOD Stage</button>
+        <button class="pill pill-sub" data-subfilter="C-SUITE" onclick="setSubFilter('C-SUITE',this)">C-Suite Stage</button>
+        <button class="pill pill-sub" data-subfilter="MD" onclick="setSubFilter('MD',this)">MD Stage</button>
+        <button class="pill pill-sub" data-subfilter="IT_CHECK" onclick="setSubFilter('IT_CHECK',this)">IT Verification</button>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2 id="sectionTitle">Active Pending Queue</h2>
+      <span style="font-size:12px;color:var(--text-secondary)" id="countText"></span>
+    </div>
+    <div class="grid" id="requestList"></div>
+    <div class="empty" id="empty" style="display:none">
+      <h3>No Requests Found</h3>
+      <p>There are no asset requests matching the current filter or search criteria.</p>
+    </div>
+  </main>
+
+  <section class="access" id="access">
+    <h2>Access Restricted</h2>
+    <p id="accessMessage">Your account is not registered to access the Apollo IT Admin Portal.</p>
+  </section>
+</div>
+
+<div class="overlay" id="detailsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="modal-title" id="mTitle">Request Details</div>
+          <span id="mStatusBadge"></span>
+        </div>
+        <div class="code" id="mTicket" style="margin-top:3px">--</div>
+      </div>
+      <button class="close" onclick="closeModal()">X</button>
+    </div>
+    <div class="modal-body">
+      <div class="admin-notice-box">
+        <div><b>Administrator Read-Only Mode:</b> You have full auditing visibility of this request and its complete authorization trail. Approval actions can only be performed by designated stage approvers.</div>
+      </div>
+
+      <div>
+        <h3 class="code" style="margin-bottom:8px">REQUESTER INFORMATION</h3>
+        <div class="section">
+          <div class="field"><div class="label">Full Name</div><div class="value" id="mName">--</div></div>
+          <div class="field"><div class="label">Department</div><div class="value" id="mDept">--</div></div>
+          <div class="field"><div class="label">Email Address</div><div class="value" id="mEmail">--</div></div>
+          <div class="field"><div class="label">Submission Date</div><div class="value" id="mTimestamp">--</div></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="code" style="margin-bottom:8px">IT ASSET & EQUIPMENT REQUEST</h3>
+        <div class="section">
+          <div class="field"><div class="label">Asset Requested</div><div class="value" id="mAsset">--</div></div>
+          <div class="field"><div class="label">Quantity</div><div class="value" id="mQty">--</div></div>
+          <div class="field wide" id="justificationField" style="display:none"><div class="label">Justification for Request</div><div class="value" id="mJustification">--</div></div>
+          <div class="field wide"><div class="label">Reason / Justification</div><div class="value" id="mReason">--</div></div>
+          <div class="field wide" id="attachmentField" style="display:none"><div class="label">Attachment</div><div class="value" id="mAttachment">--</div></div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="code" style="margin-bottom:8px">DYNAMIC APPROVAL WORKFLOW</h3>
+        <div class="workflow" id="workflow"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span style="font-size:12px;color:var(--text-muted)">Apollo IT Asset Request Management System</span>
+      <button class="btn neo" onclick="closeModal()">Close View</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading" id="loading">
+  <div class="load-card">
+    <div class="shimmer-bar"></div>
+    <div id="loadingText" style="margin-top:14px;font-weight:700;font-size:14px;color:var(--text-primary)">Loading...</div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJrxSeQK5DayHPcF2TvtIRdEHd0WBiL-8",
+    authDomain: "apollo-it-asset.firebaseapp.com",
+    projectId: "apollo-it-asset",
+    storageBucket: "apollo-it-asset.firebasestorage.app",
+    messagingSenderId: "778727312299",
+    appId: "1:778727312299:web:f0011ed7370062b01a60ee"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  window.signOutUser = function() {
+    if (!confirm('Adakah anda pasti mahu log keluar?')) return;
+    signOut(auth).then(() => {
+      google.script.run.withSuccessHandler(function(url) {
+        window.top.location.href = url; 
+      }).getScriptExecUrl();
+    }).catch((error) => {
+      console.error('Logout error:', error);
+      alert('Gagal log keluar. Sila cuba lagi.');
+    });
+  };
+</script>
+
+<script>
+  let state = {
+    tab: 'pending',
+    filter: 'ALL',
+    subFilter: 'ALL_STAGES',
+    search: '',
+    current: null,
+    approver: null,
+    pending: [],
+    history: [],
+    all: [],
+    metrics: {}
+  };
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  function init() {
+    initTheme();
+    loadDashboard();
+  }
+
+  function serverCall(functionName, ...args) {
+    return new Promise((resolve, reject) => {
+      if (!(window.google && google.script && google.script.run)) {
+        reject(new Error('This template must run as a Google Apps Script Web App.'));
+        return;
+      }
+      google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(reject)[functionName](...args);
+    });
+  }
+
+  async function loadDashboard() {
+    renderDashboardShimmer();
+    try {
+      const raw = await serverCall('getAdminPortalData');
+      const res = parseResponse(raw);
+      if (!res.success) {
+        showAccessDenied(res.message || 'Unable to identify your authorization.');
+        return;
+      }
+
+      const d = res.data || {};
+      state.approver = d.approver || {};
+      state.pending = Array.isArray(d.pendingRequests) ? d.pendingRequests : [];
+      state.history = Array.isArray(d.historyRequests) ? d.historyRequests : [];
+      state.all = Array.isArray(d.allRequests) ? d.allRequests : [...state.pending, ...state.history];
+      state.metrics = d.metrics || {};
+
+      renderIdentity();
+      renderMetrics();
+      render();
+    } catch (err) {
+      showAccessDenied('Failed to connect to the admin backend: ' + (err.message || err));
+    }
+  }
+
+  async function openRequest(ticketId) {
+    const cached = state.all.find(x => String(x['Ticket ID'] || x.ticketId || '').toUpperCase() === String(ticketId).toUpperCase()) ||
+                   state.pending.find(x => String(x['Ticket ID'] || x.ticketId || '').toUpperCase() === String(ticketId).toUpperCase()) ||
+                   state.history.find(x => String(x['Ticket ID'] || x.ticketId || '').toUpperCase() === String(ticketId).toUpperCase());
+
+    const modalOverlay = document.getElementById('detailsOverlay');
+
+    if (cached) {
+      state.current = { request: cached, ticketId: ticketId, isActionableForUser: false };
+      renderModal(state.current);
+      renderWorkflowShimmer(4);
+      modalOverlay.style.display = 'flex';
+    } else {
+      renderModalShimmer(ticketId);
+      modalOverlay.style.display = 'flex';
+    }
+
+    try {
+      const raw = await serverCall('getRequestDetails', ticketId);
+      const res = parseResponse(raw);
+      if (res.success && res.data) {
+        state.current = res.data;
+        renderModal(state.current);
+      } else if (!cached) {
+        throw new Error(res.message || 'Request details not found.');
+      }
+    } catch (err) {
+      if (!cached) {
+        alert('Unable to load request details: ' + (err.message || err));
+        closeModal();
+      }
+    }
+  }
+
+  function renderIdentity() {
+    const a = state.approver || {};
+    document.getElementById('approverName').textContent = 'Welcome, ' + (a.name || 'Administrator') + '!';
+    document.getElementById('approverEmail').textContent = 'Email: ' + (a.email || 'N/A');
+    document.getElementById('approverRole').textContent = 'Role: ' + (a.role || 'ADMIN');
+    document.getElementById('routeInfo').textContent = a.routeSummary || 'Full System Monitoring Access';
+  }
+
+  function renderMetrics() {
+    const m = state.metrics || {};
+    document.getElementById('sTotal').textContent = num(m.total, state.all.length);
+    document.getElementById('sPending').textContent = num(m.pending, state.pending.length);
+    document.getElementById('sApproved').textContent = num(m.approved, 0);
+    document.getElementById('sRejected').textContent = num(m.rejected, 0);
+    document.getElementById('pendingBadge').textContent = num(m.pending, state.pending.length);
+
+    document.getElementById('sPendingSub').textContent =
+      `Mgr: ${num(m.pendingManager,0)} • HOD: ${num(m.pendingHod,0)} • CS: ${num(m.pendingCsuite,0)} • MD: ${num(m.pendingMd,0)} • IT: ${num(m.pendingIt,0)}`;
+  }
+
+  function render() {
+    state.search = document.getElementById('search').value.toLowerCase().trim();
+    const list = state.tab === 'pending'
+      ? applyStageFilter(state.pending)
+      : applyHistoryFilter(state.all);
+
+    const filtered = list.filter(matchesSearch);
+
+    document.getElementById('filters').classList.toggle('show', true);
+    document.getElementById('pendingTab').classList.toggle('active', state.tab === 'pending');
+    document.getElementById('historyTab').classList.toggle('active', state.tab === 'history');
+
+    document.getElementById('sectionTitle').textContent =
+      state.tab === 'pending' ? 'Active Pending Requests Queue' : 'All Processed Requests History';
+    document.getElementById('countText').textContent = `Showing ${filtered.length} of ${list.length} request(s)`;
+
+    const container = document.getElementById('requestList');
+    const empty = document.getElementById('empty');
+
+    if (!filtered.length) {
+      container.innerHTML = '';
+      container.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    container.style.display = 'grid';
+    container.innerHTML = filtered.map(cardHtml).join('');
+  }
+
+  function badgeHtml(status) {
+    const s = String(status || 'Pending Approval');
+    const cls = badgeClass(s);
+    return `<span class="badge ${cls}"><span class="badge-dot"></span>${esc(s)}</span>`;
+  }
+
+  function cardHtml(r) {
+    const id = esc(get(r,'Ticket ID','ticketId','ID','Code') || 'N/A');
+    const status = get(r,'DisplayStatus','Status','status') || 'Pending Approval';
+    const requester = esc(get(r,'Full Name','fullName','Name','RequestedBy') || 'N/A');
+    const dept = esc(get(r,'Department','department') || 'N/A');
+    const asset = esc(get(r,'Asset Type','assetType') || 'N/A');
+    const qty = esc(get(r,'Quantity','quantity') || '1');
+    const date = formatDate(get(r,'Timestamp','timestamp','CreatedDate'));
+
+    return `
+      <article class="request">
+        <div class="request-head">
+          <div>
+            <div class="code">${id}</div>
+            <div class="request-title">${asset}</div>
+          </div>
+          <div>${badgeHtml(status)}</div>
+        </div>
+        <div class="request-body">
+          <div><div class="label">Requester</div><div class="value">${requester}</div></div>
+          <div><div class="label">Department</div><div class="value">${dept}</div></div>
+          <div><div class="label">Asset</div><div class="value">${asset}</div></div>
+          <div><div class="label">Quantity</div><div class="value">${qty}</div></div>
+        </div>
+        <div class="request-foot">
+          <span style="font-size:12px;color:var(--text-secondary)"><b>Submitted:</b> ${esc(date || 'N/A')}</span>
+          <button class="btn primary" onclick="openRequest('${jsEsc(id)}')">View Details</button>
+        </div>
+      </article>`;
+  }
+
+  function renderModal(d) {
+    const r = d.request || d;
+    const status = get(d,'status','Status') || get(r,'Status','status') || 'Pending Approval';
+    document.getElementById('mTitle').textContent = (get(r,'Full Name','fullName','Name') || 'IT Asset Request') + ' - (Admin Audit)';
+    document.getElementById('mTicket').textContent = get(d,'ticketId','Ticket ID') || get(r,'Ticket ID','ticketId') || '--';
+    const statusBadgeEl = document.getElementById('mStatusBadge');
+    if (statusBadgeEl) statusBadgeEl.innerHTML = badgeHtml(status);
+    document.getElementById('mName').textContent = get(r,'Full Name','fullName','Name') || 'N/A';
+    document.getElementById('mDept').textContent = get(r,'Department','department') || 'N/A';
+    document.getElementById('mEmail').textContent = get(d,'requesterEmail','Email Address','email') || resolveEmail(r) || 'N/A';
+    document.getElementById('mTimestamp').textContent = formatDate(get(r,'Timestamp','timestamp')) || 'N/A';
+    document.getElementById('mAsset').textContent = get(r,'Asset Type','assetType') || 'N/A';
+    document.getElementById('mQty').textContent = get(r,'Quantity','quantity') || '1';
+
+    const justReq = get(r, 'Justification for Request', 'Justification for request', 'Justification of Request', 'justificationForRequest', 'justification');
+    const justBox = document.getElementById('justificationField');
+    if (justBox) {
+      if (justReq && justReq !== '-' && justReq !== 'N/A') {
+        justBox.style.display = 'block';
+        document.getElementById('mJustification').textContent = justReq;
+      } else {
+        justBox.style.display = 'none';
+      }
+    }
+
+    document.getElementById('mReason').textContent = get(r,'Reason / Justification','Reason','reason') || 'N/A';
+
+    const att = get(r,'Attachment','attachment');
+    const attBox = document.getElementById('attachmentField');
+    if (att) {
+      attBox.style.display = 'block';
+      document.getElementById('mAttachment').innerHTML = /^https?:/i.test(String(att))
+        ? `<a href="${escAttr(att)}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">Open Attachment</a>`
+        : esc(att);
+    } else attBox.style.display = 'none';
+
+    renderWorkflow(d.workflow || buildWorkflowFromRow(r));
+  }
+
+  function renderWorkflow(steps) {
+    const arr = Array.isArray(steps) ? steps : [];
+    document.getElementById('workflow').innerHTML = arr.map(s => `
+      <div class="step">
+        <div class="step-role">${esc(s.role || s.stage || 'Approval')}</div>
+        <div class="step-name">${esc(s.name || '-')}</div>
+        <div style="margin-top:6px">${badgeHtml(s.status || 'Pending')}</div>
+        <div class="step-date" style="margin-top:4px">${esc(s.date || '-')}</div>
+      </div>`).join('') || '<div style="color:var(--text-secondary)">No workflow data available.</div>';
+  }
+
+  function renderWorkflowShimmer(count) {
+    const total = count || 5;
+    const defaultRoles = ['MANAGER', 'HOD', 'C-SUITE', 'MD', 'IT CHECK'];
+    let html = '';
+    for (let i = 0; i < total; i++) {
+      const roleName = defaultRoles[i] || 'APPROVAL';
+      html += `
+        <div class="step shimmer-step">
+          <div class="step-role" style="opacity:0.6">${roleName}</div>
+          <div class="shimmer-line" style="width:85%;height:13px;margin:2px 0 4px"></div>
+          <div class="shimmer-line" style="width:70px;height:19px;border-radius:6px"></div>
+          <div class="shimmer-line" style="width:55px;height:9px;margin-top:2px"></div>
+        </div>`;
+    }
+    document.getElementById('workflow').innerHTML = html;
+  }
+
+  function renderModalShimmer(ticketId) {
+    document.getElementById('mTitle').innerHTML = '<span class="shimmer-line" style="width:160px;height:18px"></span>';
+    document.getElementById('mTicket').innerHTML = ticketId ? esc(ticketId) : '<span class="shimmer-line" style="width:70px;height:12px"></span>';
+    const statusBadgeEl = document.getElementById('mStatusBadge');
+    if (statusBadgeEl) statusBadgeEl.innerHTML = '<span class="shimmer-line" style="width:80px;height:20px;border-radius:8px"></span>';
+
+    document.getElementById('mName').innerHTML = '<span class="shimmer-line" style="width:130px;height:14px"></span>';
+    document.getElementById('mDept').innerHTML = '<span class="shimmer-line" style="width:100px;height:14px"></span>';
+    document.getElementById('mEmail').innerHTML = '<span class="shimmer-line" style="width:160px;height:14px"></span>';
+    document.getElementById('mTimestamp').innerHTML = '<span class="shimmer-line" style="width:110px;height:14px"></span>';
+    document.getElementById('mAsset').innerHTML = '<span class="shimmer-line" style="width:140px;height:14px"></span>';
+    document.getElementById('mQty').innerHTML = '<span class="shimmer-line" style="width:30px;height:14px"></span>';
+    document.getElementById('mReason').innerHTML = '<span class="shimmer-line" style="width:90%;height:14px"></span>';
+
+    document.getElementById('attachmentField').style.display = 'none';
+    renderWorkflowShimmer(5);
+  }
+
+  function renderDashboardShimmer() {
+    document.getElementById('approverName').innerHTML = '<span class="shimmer-line" style="width:220px;height:22px"></span>';
+    document.getElementById('approverEmail').innerHTML = '<span class="shimmer-line" style="width:150px;height:14px"></span>';
+    document.getElementById('routeInfo').innerHTML = '<span class="shimmer-line" style="width:160px;height:16px"></span>';
+
+    document.getElementById('sTotal').innerHTML = '<span class="shimmer-line" style="width:40px;height:30px"></span>';
+    document.getElementById('sPending').innerHTML = '<span class="shimmer-line" style="width:40px;height:30px"></span>';
+    document.getElementById('sApproved').innerHTML = '<span class="shimmer-line" style="width:40px;height:30px"></span>';
+    document.getElementById('sRejected').innerHTML = '<span class="shimmer-line" style="width:40px;height:30px"></span>';
+    document.getElementById('pendingBadge').textContent = '...';
+    document.getElementById('countText').textContent = 'Loading requests...';
+
+    const container = document.getElementById('requestList');
+    const empty = document.getElementById('empty');
+    empty.style.display = 'none';
+    container.style.display = 'grid';
+
+    let shimmerCards = '';
+    for (let i = 0; i < 3; i++) {
+      shimmerCards += `
+        <article class="request" style="pointer-events:none">
+          <div class="request-head">
+            <div>
+              <div class="shimmer-line" style="width:75px;height:12px;margin-bottom:6px"></div>
+              <div class="shimmer-line" style="width:170px;height:18px"></div>
+            </div>
+            <div><div class="shimmer-line" style="width:85px;height:24px;border-radius:8px"></div></div>
+          </div>
+          <div class="request-body">
+            <div><div class="label">Requester</div><div class="value"><div class="shimmer-line" style="width:100px;height:14px;margin-top:2px"></div></div></div>
+            <div><div class="label">Department</div><div class="value"><div class="shimmer-line" style="width:80px;height:14px;margin-top:2px"></div></div></div>
+            <div><div class="label">Asset</div><div class="value"><div class="shimmer-line" style="width:110px;height:14px;margin-top:2px"></div></div></div>
+            <div><div class="label">Quantity</div><div class="value"><div class="shimmer-line" style="width:30px;height:14px;margin-top:2px"></div></div></div>
+          </div>
+          <div class="request-foot">
+            <div class="shimmer-line" style="width:130px;height:14px"></div>
+            <div class="shimmer-line" style="width:115px;height:36px;border-radius:12px"></div>
+          </div>
+        </article>`;
+    }
+    container.innerHTML = shimmerCards;
+  }
+
+  function buildWorkflowFromRow(r) {
+    const rawSteps = [
+      { role: 'MANAGER', nameKey: 'Manager Approver', dateKey: 'Manager Approval Date' },
+      { role: 'HOD', nameKey: 'HOD Approver', dateKey: 'HOD Approval Date' },
+      { role: 'C-SUITE', nameKey: 'C-Suite Approver', dateKey: 'C-Suite Approval Date' },
+      { role: 'IT CHECK', nameKey: 'IT Check (Execution)', dateKey: 'IT Check Date' },
+      { role: 'MD', nameKey: 'MD Approver', dateKey: 'MD Approval Date' },
+      { role: 'HOD IT', nameKey: 'IT HOD Verified', dateKey: 'IT HOD Date' }
+    ];
+
+    const activeSteps = [];
+    rawSteps.forEach(s => {
+      const name = get(r, s.nameKey);
+      const date = get(r, s.dateKey);
+      if (name && name !== '-' && !name.toLowerCase().includes('bypassed') && !name.toLowerCase().includes('not required')) {
+        activeSteps.push({
+          role: s.role,
+          name: name,
+          date: date || '-',
+          status: workflowStatus(date)
+        });
+      }
+    });
+
+    return activeSteps;
+  }
+
+  function workflowStatus(date) {
+    if (!date || String(date).toLowerCase() === 'pending' || date === '-' || String(date).toLowerCase().includes('bypassed')) return 'Pending';
+    return 'Approved / Verified';
+  }
+
+  function applyStageFilter(list) {
+    if (state.subFilter === 'ALL_STAGES') return list;
+    return list.filter(r => {
+      const stage = String(get(r,'currentStage','stage') || '').toUpperCase();
+      const s = String(get(r,'Status','status') || '').toLowerCase();
+      if (state.subFilter === 'MANAGER') return stage === 'MANAGER' || s.includes('manager');
+      if (state.subFilter === 'HOD') return stage === 'HOD' || s.includes('hod');
+      if (state.subFilter === 'C-SUITE') return stage === 'C-SUITE' || s.includes('c-suite') || s.includes('csuite');
+      if (state.subFilter === 'MD') return stage === 'MD' || s.includes('md');
+      if (state.subFilter === 'IT_CHECK') return stage === 'IT_CHECK' || stage === 'IT_HOD' || s.includes('it');
+      return true;
+    });
+  }
+
+  function applyHistoryFilter(list) {
+    let filtered = list;
+
+    if (state.filter === 'APPROVED') {
+      filtered = filtered.filter(r => {
+        const s = String(get(r,'Status','status') || '').toLowerCase();
+        return (s.includes('approved') || s.includes('verified') || s.includes('completed') || r.isCompleted) && !s.includes('reject') && !s.includes('return');
+      });
+    } else if (state.filter === 'REJECTED') {
+      filtered = filtered.filter(r => {
+        const s = String(get(r,'Status','status') || '').toLowerCase();
+        return s.includes('reject') || s.includes('return');
+      });
+    } else if (state.filter === 'PENDING') {
+      filtered = filtered.filter(r => {
+        const s = String(get(r,'Status','status') || '').toLowerCase();
+        const stage = String(get(r,'currentStage','stage') || '').toUpperCase();
+        return !s.includes('reject') && !s.includes('return') && !r.isCompleted && stage !== 'COMPLETED' && stage !== 'TERMINATED';
+      });
+    }
+
+    return applyStageFilter(filtered);
+  }
+
+  function matchesSearch(r) {
+    if (!state.search) return true;
+    const values = [
+      get(r,'Ticket ID','ticketId','ID'), get(r,'Full Name','Name','fullName'),
+      get(r,'Department','department'), get(r,'Asset Type','assetType'),
+      get(r,'Reason / Justification','Reason','reason'), get(r,'Status','status')
+    ].map(v => String(v || '').toLowerCase());
+    return values.some(v => v.includes(state.search));
+  }
+
+  function switchTab(tab) {
+    state.tab = tab;
+    render();
+  }
+
+  function setFilter(filter, btn) {
+    state.filter = filter;
+    document.querySelectorAll('.filter-row .pill').forEach(x => x.classList.remove('active'));
+    const target = btn || document.querySelector(`.filter-row .pill[data-filter="${filter}"]`);
+    if (target) target.classList.add('active');
+    render();
+  }
+
+  function setSubFilter(subFilter, btn) {
+    state.subFilter = subFilter;
+    document.querySelectorAll('.sub-filters .pill').forEach(x => x.classList.remove('active'));
+    const target = btn || document.querySelector(`.sub-filters .pill[data-subfilter="${subFilter}"]`);
+    if (target) target.classList.add('active');
+    render();
+  }
+
+  function closeModal(){document.getElementById('detailsOverlay').style.display='none';state.current=null}
+  function showLoading(msg){document.getElementById('loadingText').textContent=msg||'Processing...';document.getElementById('loading').style.display='flex'}
+  function hideLoading(){document.getElementById('loading').style.display='none'}
+  function showAccessDenied(msg){document.getElementById('main').style.display='none';document.getElementById('identity').style.display='none';document.getElementById('access').style.display='block';document.getElementById('accessMessage').textContent=msg}
+  function initTheme(){applyTheme(localStorage.getItem('approval_portal_theme')||'dark')}
+  function toggleTheme(){applyTheme(document.body.classList.contains('theme-light')?'dark':'light')}
+  function applyTheme(t){document.body.classList.toggle('theme-light',t==='light');document.body.classList.toggle('theme-dark',t!=='light');localStorage.setItem('approval_portal_theme',t);document.getElementById('themeBtn').textContent=t==='light'?'Light':'Dark'}
+  function parseResponse(x){if(typeof x==='string'){try{return JSON.parse(x)}catch(e){return {success:false,message:x}}}return x||{success:false,message:'Empty backend response'}}
+  function get(o,...keys){for(const k of keys){if(o && o[k]!==undefined && o[k]!==null && String(o[k]).trim()!=='')return o[k]}return ''}
+  function num(a,b){return a===undefined||a===null||a===''?b:Number(a)||0}
+  function badgeClass(s){s=String(s||'pending').toLowerCase();if(s.includes('reject'))return'rejected';if(s.includes('return'))return'returned';if(s.includes('approved')||s.includes('verified')||s.includes('completed'))return'approved';return'pending'}
+  function formatDate(v){if(!v)return'';const d=new Date(v);if(!isNaN(d.getTime()))return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');return String(v)}
+  function resolveEmail(r){for(const k of ['Email Address','Email','email'])if(r&&r[k])return r[k];return''}
+  function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+  function escAttr(v){return esc(v)}
+  function jsEsc(v){return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}
+</script>
+</body>
+</html>

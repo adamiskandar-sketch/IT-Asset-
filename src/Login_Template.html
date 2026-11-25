@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apollo IT Portal - Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root, body.theme-dark {
+      --bg-main:#0F172A; --bg-card:#182338; --bg-input:#121C2D;
+      --text-primary:#F1F5F9; --text-secondary:#94A3B8; --text-muted:#64748B;
+      --border-color:#26344D; --accent:#60A5FA; --accent-hover:#3B82F6;
+      --success:#34D399; --danger:#F87171;
+      --shadow:0 20px 40px rgba(0,0,0,.4); --shadow-sm:0 4px 12px rgba(0,0,0,.2);
+    }
+    body.theme-light {
+      --bg-main:#eef2f7; --bg-card:#ffffff; --bg-input:#f8fafc;
+      --text-primary:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8;
+      --border-color:#e2e8f0; --accent:#2563eb; --accent-hover:#1d4ed8;
+      --success:#059669; --danger:#dc2626;
+      --shadow:0 10px 25px rgba(0,0,0,.08); --shadow-sm:0 2px 6px rgba(0,0,0,.05);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-main); color: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px 16px; transition: background 0.3s, color 0.3s;
+    }
+    
+    .theme-btn {
+      position: fixed; right: 20px; top: 20px; z-index: 999;
+      padding: 8px 16px; border-radius: 9999px;
+      background: var(--bg-card); color: var(--text-primary);
+      border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+      cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s;
+    }
+    .theme-btn:hover { transform: scale(1.05); }
+
+    .login-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 24px; box-shadow: var(--shadow);
+      width: 100%; max-width: 420px; padding: 36px 28px; text-align: center;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .logo { width: 64px; height: 64px; border-radius: 16px; background: #fff; margin: 0 auto 18px; padding: 4px; box-shadow: var(--shadow-sm); }
+    .logo img { width: 100%; height: 100%; object-fit: contain; }
+    h1 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    p.sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+
+    /* FIX: Tukar display: none kepada block */
+    .profile-box { display: block; text-align: left; margin-bottom: 20px; background: var(--bg-input); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); transition: background 0.3s; }
+    .profile-name { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+    .profile-email { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+    .profile-role { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; background: rgba(96,165,250,0.15); color: var(--accent); border: 1px solid var(--accent); }
+    
+    .selector-box { display: none; margin-top: 16px; text-align: left; }
+    .selector-label { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; display: block; }
+    .selector-select { width: 100%; padding: 11px 14px; border-radius: 10px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--accent); font-size: 13px; font-weight: 600; outline: none; cursor: pointer; transition: background 0.3s; }
+
+    .btn-google {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 14px; border-radius: 12px;
+      background: #fff; color: #1e293b; font-size: 14px; font-weight: 700;
+      border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .btn-google:hover { background: #f8fafc; transform: translateY(-1px); }
+    .btn-google img { width: 20px; height: 20px; }
+
+    .btn-continue {
+      width: 100%; padding: 14px; border-radius: 12px; border: 0;
+      background: var(--accent); color: #fff; font-size: 14px; font-weight: 700;
+      cursor: pointer; box-shadow: var(--shadow-sm); transition: all 0.2s ease; margin-top: 16px;
+    }
+    .btn-continue:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-continue:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .error-box {
+      background: rgba(248,113,113,0.15); border: 1px solid var(--danger);
+      color: var(--danger); padding: 14px; border-radius: 12px;
+      font-size: 13px; margin-top: 20px; display: none; text-align: left;
+    }
+    #loadingBox { padding: 20px; font-size: 13px; color: var(--text-secondary); }
+  </style>
+</head>
+<body class="theme-dark">
+
+<button class="theme-btn" id="themeBtn" onclick="toggleTheme()">Light</button>
+
+<div class="login-card">
+  <div class="logo">
+    <img src="https://lh3.googleusercontent.com/d/1mTsteFimPWOJYqvRaN3WBbh9GXw6K13V" alt="Apollo Logo" onerror="this.src='https://drive.google.com/thumbnail?id=1mTsteFimPWOJYqvRaN3WBbh9GXw6K13V&sz=w200'" />
+  </div>
+
+  <h1>Apollo IT Asset Portal</h1>
+  <p class="sub">Sign in with your official company Google Account</p>
+
+  <div id="loadingBox">Initializing secure login...</div>
+
+  <button id="googleSignInBtn" class="btn-google" style="display:none;" onclick="signInWithGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+    Sign in with Google
+  </button>
+
+  <div id="profileBox" style="display:none;">
+    <div class="profile-box">
+      <div class="profile-name" id="pName">--</div>
+      <div class="profile-email" id="pEmail">--</div>
+      <div class="profile-role" id="pRole">--</div>
+
+      <!-- DROPDOWN DUAL ROLE -->
+      <div class="selector-box" id="dashboardSelectorBox">
+        <label class="selector-label" for="targetDashboardSelect">Select Target Dashboard:</label>
+        <select class="selector-select" id="targetDashboardSelect"></select>
+      </div>
+    </div>
+    <button class="btn-continue" id="enterBtn" onclick="proceedToPortal()">Continue to Dashboard</button>
+  </div>
+
+  <div id="errorBox" class="error-box">
+    <b>Access Restricted</b><br>
+    <span id="errorMsg"></span>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJrxSeQK5DayHPcF2TvtIRdEHd0WBiL-8",
+    authDomain: "apollo-it-asset.firebaseapp.com",
+    projectId: "apollo-it-asset",
+    storageBucket: "apollo-it-asset.firebasestorage.app",
+    messagingSenderId: "778727312299",
+    appId: "1:778727312299:web:f0011ed7370062b01a60ee"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  let userProfileData = null;
+
+  // Init Theme
+  const savedTheme = localStorage.getItem('apollo_login_theme') || 'dark';
+  applyTheme(savedTheme);
+
+  document.getElementById('loadingBox').style.display = 'none';
+  document.getElementById('googleSignInBtn').style.display = 'flex';
+
+  window.signInWithGoogle = async function() {
+    document.getElementById('errorBox').style.display = 'none';
+    document.getElementById('googleSignInBtn').style.display = 'none';
+    document.getElementById('loadingBox').style.display = 'block';
+    document.getElementById('loadingBox').textContent = 'Authenticating with Google...';
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const userEmail = user.email;
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          const parsed = typeof res === 'string' ? JSON.parse(res) : res;
+          if (parsed.success) {
+            userProfileData = parsed.data;
+            const prof = userProfileData.profile;
+
+            document.getElementById('pName').textContent = prof.name || 'User';
+            document.getElementById('pEmail').textContent = prof.email || userEmail;
+            document.getElementById('pRole').textContent = 'Role: ' + (prof.role || 'AUTHORIZED');
+
+            // SETUP DROPDOWN
+            const selectEl = document.getElementById('targetDashboardSelect');
+            const boxEl = document.getElementById('dashboardSelectorBox');
+            selectEl.innerHTML = '';
+            
+            const availablePages = userProfileData.availablePages || [];
+            console.log("Available Pages from Backend:", availablePages); // Buka Console (F12) untuk tengok data ni
+            
+            if (availablePages.length > 0) {
+              availablePages.forEach(function(p) {
+                const opt = document.createElement('option');
+                opt.value = p.page;
+                opt.textContent = p.label;
+                selectEl.appendChild(opt);
+              });
+              boxEl.style.display = 'block'; // Tunjuk dropdown
+            } else {
+              boxEl.style.display = 'none'; // Sembunyi
+            }
+
+            document.getElementById('loadingBox').style.display = 'none';
+            document.getElementById('profileBox').style.display = 'block';
+          } else {
+            showError(parsed.message || 'Your account is not registered.');
+            signOut(auth);
+          }
+        })
+        .withFailureHandler(function(err) {
+          showError('Backend error: ' + err);
+          signOut(auth);
+        })
+        .checkActiveUserProfileByEmail(userEmail);
+        
+    } catch (error) {
+      document.getElementById('googleSignInBtn').style.display = 'flex';
+      document.getElementById('loadingBox').style.display = 'none';
+      if (error.code !== 'auth/popup-closed-by-user') {
+        showError(error.message || 'Login failed.');
+      }
+    }
+  };
+
+  window.proceedToPortal = function() {
+    if (!userProfileData) return;
+    const btn = document.getElementById('enterBtn');
+    btn.disabled = true;
+    btn.textContent = 'Redirecting...';
+
+    const selectEl = document.getElementById('targetDashboardSelect');
+    const boxEl = document.getElementById('dashboardSelectorBox');
+
+    let selectedPage = userProfileData.redirectPage;
+    if (boxEl.style.display === 'block' && selectEl && selectEl.value) {
+      selectedPage = selectEl.value;
+    }
+
+    google.script.run
+      .withSuccessHandler(function(execUrl) {
+        var finalDestination = execUrl + '?page=' + encodeURIComponent(selectedPage);
+        if (window.top) {
+          window.top.location.href = finalDestination;
+        } else {
+          window.location.href = finalDestination;
+        }
+      })
+      .withFailureHandler(function(err) {
+        alert('Redirection failed: ' + (err.message || err));
+        btn.disabled = false;
+        btn.textContent = 'Continue to Dashboard';
+      })
+      .getScriptExecUrl();
+  };
+
+  function showError(msg) {
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('profileBox').style.display = 'none';
+    document.getElementById('errorMsg').textContent = msg;
+    document.getElementById('errorBox').style.display = 'block';
+    document.getElementById('googleSignInBtn').style.display = 'flex';
+  }
+
+  window.toggleTheme = function() {
+    const isDark = document.body.classList.contains('theme-dark');
+    applyTheme(isDark ? 'light' : 'dark');
+  };
+
+  function applyTheme(t) {
+    document.body.classList.toggle('theme-light', t === 'light');
+    document.body.classList.toggle('theme-dark', t !== 'light');
+    document.getElementById('themeBtn').textContent = t === 'light' ? 'Light' : 'Dark';
+    localStorage.setItem('apollo_login_theme', t);
+  }
+</script>
+</body>
+</html>

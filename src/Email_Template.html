@@ -1,0 +1,94 @@
+<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 620px; border: 2px solid #d32f2f; padding: 20px; border-radius: 8px; margin: 0 auto; background-color: #ffffff;">
+
+  <style>
+    /* CSS for the blinking button (Green - Red) */
+    @keyframes blink-green-red {
+      0% { background-color: #2e7d32; box-shadow: 0 0 10px #4caf50; border-color: #4caf50; }
+      50% { background-color: #c62828; box-shadow: 0 0 20px #f44336; border-color: #f44336; }
+      100% { background-color: #2e7d32; box-shadow: 0 0 10px #4caf50; border-color: #4caf50; }
+    }
+    .blinking-btn {
+      animation: blink-green-red 1.5s infinite !important;
+    }
+  </style>
+
+  <!-- Header Title -->
+  <h2 style="background-color: <?= headerBg ?>; color: #ffffff; padding: 12px; margin-top: 0; text-align: center; border-radius: 4px; font-size: 17px; font-weight: bold;">
+    <?= stepTitle ?>
+  </h2>
+
+  <!-- Greeting -->
+  <p style="font-size: 14px;"><?!= greetingTitle ?></p>
+  <p style="font-size: 14px;"><?= introText ?></p>
+
+  <!-- Request Details List -->
+  <ul style="font-size: 13.5px; line-height: 1.8; list-style-type: none; padding-left: 0; background-color: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee;">
+    <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Ticket ID:</b> <b style="color:#d32f2f;"><?= ticketId ?></b></li>
+    <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Full Name:</b> <?= staffName ?></li>
+    <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Department:</b> <?= department ?></li>
+    <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Asset Type / Requested:</b> <?= assetName ?></li>
+    <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Quantity:</b> <?= qty ?></li>
+
+    <? if (justification && String(justification).trim() !== '-' && String(justification).trim() !== 'N/A' && String(justification).toLowerCase() !== String(reason).toLowerCase()) { ?>
+      <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Justification for Request:</b> <?= justification ?></li>
+    <? } ?>
+
+    <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Reason / Justification:</b> <?= reason ?></li>
+
+    <? if (attachment && String(attachment).trim() !== '-' && String(attachment).trim() !== 'N/A') { ?>
+      <li style="padding: 4px 0; border-bottom: 1px solid #eee;"><b>Attachment:</b> <a href="<?= attachment ?>" target="_blank" style="color:#1976d2; font-weight:bold;">📎 View Attachment</a></li>
+    <? } ?>
+
+    <li style="padding: 4px 0;"><b>Workflow Route:</b> <?= routeText ?></li>
+  </ul>
+
+  <!-- Remarks Box (For Rejected / Returned) -->
+  <? if (remarks) { ?>
+    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 14px; margin: 15px 0; font-size: 13px; color: #856404;">
+      💬 <b>Approver Remarks / Reason:</b> <?= remarks ?>
+    </div>
+  <? } ?>
+
+  <!-- How to Use Dashboard (Step-by-step) -->
+  <div style="background-color: #f9f9f9; border-left: 4px solid #d32f2f; padding: 14px 18px; margin: 20px 0; font-size: 13px; color: #333; border-radius: 4px;">
+    <div style="font-weight: bold; color: #b71c1c; margin-bottom: 10px; font-size: 14px;">
+      📌 Action Required — Please Follow These Steps:
+    </div>
+    <ol style="margin: 0; padding-left: 20px; line-height: 1.9;">
+      <li>Click the blinking <b>CLICK HERE</b> button below.</li>
+      <li>Sign in using your <b>official company Google Account</b>.</li>
+      <li>Locate ticket <b style="color:#b71c1c;"><?= ticketId ?></b> in the dashboard.</li>
+      <li>Click <b>View Details</b> to review the full information.</li>
+      <li>Perform one of the following actions:
+        <ul style="margin: 4px 0 4px 18px; padding: 0; list-style-type: disc;">
+          <li><b style="color:#2e7d32;">Approve</b> — Approve this request.</li>
+          <li><b style="color:#c62828;">Reject</b> — Reject this request (provide a reason in the remarks field).</li>
+          <li><b style="color:#1565c0;">Discussion</b> — Send a message or query to Admin IT for further clarification.</li>
+        </ul>
+      </li>
+      <li>Once an action is taken, the system will automatically notify the next approver.</li>
+    </ol>
+  </div>
+
+  <!-- Main Button (Blinking) -->
+  <div style="text-align: center; margin: 35px 0;">
+    <a href="<?= portalUrl ?>" class="blinking-btn" style="background-color: #2e7d32; color: #ffffff; padding: 18px 40px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block; font-size: 16px; border: 3px solid #4caf50; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-transform: uppercase; letter-spacing: 1px;">
+      👉 CLICK HERE TO OPEN DASHBOARD 👈
+    </a>
+    <p style="font-size: 11px; color: #777; margin-top: 15px;">(If the button is not blinking, please click the green button above)</p>
+  </div>
+
+  <!-- Important Note -->
+  <div style="text-align: center; background-color: #ffebee; padding: 12px; border-radius: 6px; margin-top: 8px;">
+    <p style="font-size: 12px; color: #b71c1c; margin: 0 0 4px 0; font-weight: bold;">⚠️ Important Notice</p>
+    <p style="font-size: 11.5px; color: #555; margin: 0; line-height: 1.6;">
+      Approve / Reject / Chat actions can only be performed through the dashboard.<br>
+      Actions submitted via email will not be processed by the system.
+    </p>
+  </div>
+
+  <p style="font-size: 11px; color: #666; text-align: center; margin-top: 20px; margin-bottom: 0; font-style: italic;">
+    📄 Please refer to the attached PDF for the complete request information.
+  </p>
+
+</div>
